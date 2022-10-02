@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+	<div style="background: #DEF7FE;">
+		<h1 style="padding: 10px;">Список ваших друзей</h1>
+		<hr>
+		<form style="margin-left: 5px;" method="post" action="{%url 'users:friend_list' user.id%}">
+			{%csrf_token%}
+			<input style="width: 250px; border-left: none; border-top: none; border-color: #DEF7FE; box-shadow: none;" class="" type="" name="found_user" placeholder="Введите логин пользователя"><input class=" btn-success" type="submit" name="" value="Найти" style="border:None; background: #DEF7FE; bor">
+			
+		</form>
+		{%if found_user%}
+		<hr>
+			{%if found_user == 'Пользователь был не найден'%}
+				<p style="font-size: 18px;">{{found_user}}</p>
+			{%else%}
+			<div style="padding: 10px;">
+				{% if found_user.img %}
+	        	<img src="{{ found_user.img.url }}" style="float: left;width: 100px; height: 120px;">
+		        {%endif%}
+		        	<p style="font-size: 18px; padding-right: 10px;">
+		        			
+		        			{{found_user.username}}<br>
+		        			{{found_user.get_full_name}}<br>
+		        			<a class="btn btn-outline-info" href="{% url 'users:profile' found_user.id %}" style="font-size: 14px;">Открыть профиль</a><br>
+		        	</p>
+		      </div>
+			{%endif%}
+
+		{% endif %}
+
+		<hr>
+		{% if user.accept.all %}
+		{%for req in user.accept.all%}
+            			
+            		<p class="dropdown-item">
+            			Запрос в друзья от {{req.user_send.username}}<br>
+            			<a class="btn btn-outline-success" href="{% url 'users:accept_friend' req.user_send.id user.id%} ">Принять</a><a class='btn btn-outline-danger' href="{%url 'users:reject_friend' req.user_send.id user.id%}"> Отклонить</a>
+            		</p>
+            		
+        {%endfor%}
+        {%else%}
+        <p>Заявок в друзья пока нет.</p>
+        {% endif %}  <hr>
+        {%for friend_in_list in user.owner.all%}
+        <div style="padding: 10px;">
+        	{%if friend_in_list.friend.img%}
+        <img src="{{ friend_in_list.friend.img.url }}" style="float: left;width: 100px; height: 120px;">
+	        {%endif%}
+	        		<p style="font-size: 18px; padding-right: 10px;">
+	        			
+	        			{{friend_in_list.friend.username}}<br>
+	        			{{friend_in_list.friend.get_full_name}}<br>
+	        			<a class="btn btn-outline-info" href="{% url 'users:profile' friend_in_list.friend.id %}" style="font-size: 14px;">Открыть профиль</a><br>
+	        			<a class="btn btn-outline-danger" style="font-size: 14px;" href="{% url 'users:delete_friend' user.id friend_in_list.friend.id%}">Удалить из друзей</a>
+	        	</p>
+	      </div>
+	      <hr>
+        {%endfor%}
+      
+        
+
+	</div>
+{%endblock%}
