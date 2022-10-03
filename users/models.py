@@ -23,3 +23,8 @@ class ProfilePost(models.Model):
 	text = models.CharField(max_length=800)
 	img = models.ImageField(upload_to='post_photo/', blank=True)
 	pub_date = models.DateTimeField(default=timezone.now)
+
+
+class LikesPost(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	post = models.ForeignKey(ProfilePost, on_delete=models.CASCADE)

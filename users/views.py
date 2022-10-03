@@ -7,7 +7,7 @@ from django.contrib.auth import login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 
-from .models import User, RequestFriends, UserFriends, ProfilePost
+from .models import User, RequestFriends, UserFriends, ProfilePost, LikesPost
 from .forms import *
 
 
@@ -37,12 +37,6 @@ class LoginUserView(LoginView):
 
 	def get_success_url(self):
 		return reverse('messanger:index')
-
-
-class UserProfileView(DetailView):
-	template_name = 'users/profile.html'
-	model = User
-	context_object_name = 'user_profile'
 
 
 def user_profile(request, pk):
@@ -81,8 +75,8 @@ def user_profile(request, pk):
 			context['friend_status'] = 'add_friend'
 
 	if len(User.objects.get(pk=pk).profilepost_set.all())>=1:
-		print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
 		context['post_list'] = ProfilePost.objects.filter(user_id=pk).order_by('-pub_date').all()
+
 
 	return render(request, 'users/profile.html', context=context)
 
@@ -162,6 +156,36 @@ def check_friend_list(request, pk):
 		return render(request, 'users/friend_list.html', context=context)
 
 	return HttpResponseRedirect(reverse('messanger:index'))
+
+
+def post_handler(request, pk, user_id):
+
+	post = ProfilePost.objects.get(pk=pk)
+
+
+
+	if request.method == 'GET':
+
+		if request.GET.get('add_like'):
+
+			if len(LikesPost.objects.filter(user_id=request.user.id).filter(post_id = post.id).all()) <= 1:
+				lp = LikesPost(
+					user = request.user,
+					post = post
+				)
+				lp.save()
+
+		elif request.GET.get('delete_like'):
+			if len(LikesPost.objects.filter(user_id=request.user.id).filter(post_id = post.id).all()) >= 1:
+				LikesPost.objects.filter(user_id=request.user.id).filter(post_id=post.id).first().delete()
+
+
+		elif request.GET.get('delete_post'):
+			if request.user.id == user_id:
+				ProfilePost.objects.get(pk=pk).delete()
+
+
+	return HttpResponseRedirect(reverse('users:profile', kwargs={'pk':post.user.id}))
 
 
 @login_required

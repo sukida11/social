@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load user_id_filter %}
 {% block content %}
 
 
@@ -124,22 +125,44 @@
 	{% for post in post_list %}
 		
 		<div class="d-flex" style="background: #B5F2EA; margin-top: 20px; border-radius: 10px;">
+  		
   			{%if post.img%}
+  		
   			<div class="p-2 flex-fill">
   				
 				<img src="{{post.img.url}}" style="max-width: 500px; max-height: 500px; ">
 
   			</div>
+  		
   			{% endif %}
+  		
   			<div class="p-2 flex-fill">
-  				<div><p>{{post.text|linebreaksbr}}</p></div>
+  		
+  				<div><p>{{post.text|linebreaksbr}}&nbsp;&nbsp;&nbsp;</p></div>
  
-				<p style="text-align: right;">{{post.pub_date}}  <a style="text-align: right;">Отемна</a></p>
+				<p style="text-align: right; margin-left: 10px; margin-right: 10px;">{{post.pub_date}}	 {%if user.id == user_profile.id%}<a style="font-size: 14px;text-align: right;" href="{% url 'users:post_handler' post.id user_profile.id %}?delete_post=yes" class="btn btn-outline-danger">Удалить публикацию</a>{%endif%}
+					
+					{% if post.likespost_set%}
+						{%for like_in_post in post.likespost_set|id_filter:user.id%}
+							{%if like_in_post.post.id == post.id and like_in_post.user.id == user.id%}
+					 			<a href="{% url 'users:post_handler' post.id user_profile.id %}?delete_like=yes" style="text-decoration: none; font-size: 27px;">&nbsp;❤️</a>
+					 			<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
+				 			{%elif forloop.last and like_in_post.user.id != user.id %}
+					 			<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes">&nbsp;♡</a>
+					 			<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
+				 			{%endif%}
+				 		{%empty%}
+					 		<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes">&nbsp;♡</a>
+					 		<br>
+					 		<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
+				 		{%endfor%}
+					{%endif%}
+					</p>
+		
 			</div>
+		
 		</div>
 		
-		
-
 	{%endfor%}
 
 </div>
