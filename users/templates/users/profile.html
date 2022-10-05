@@ -91,9 +91,13 @@
 			</div>
 		{% endif %}
 
-
+		<div style="margin-top: 10px; font-size: 17px;">
+		<a class="btn btn-outline-info" href='{%url "messanger:chats"%}?add_new_chat=yes&with_user={{user_profile.id}}'>Начать диалог</a>
+	</div>
 	{% endif %}
 	
+	
+
 	{%if user.id == user_profile.id%}
 
 
@@ -124,7 +128,7 @@
 
 	{% for post in post_list %}
 		
-		<div class="d-flex" style="background: #B5F2EA; margin-top: 20px; border-radius: 10px;">
+		<div id="{{post.id}}" class="d-flex" style="background: #B5F2EA; margin-top: 20px; border-radius: 10px;">
   		
   			{%if post.img%}
   		
@@ -145,14 +149,14 @@
 					{% if post.likespost_set%}
 						{%for like_in_post in post.likespost_set|id_filter:user.id%}
 							{%if like_in_post.post.id == post.id and like_in_post.user.id == user.id%}
-					 			<a href="{% url 'users:post_handler' post.id user_profile.id %}?delete_like=yes" style="text-decoration: none; font-size: 27px;">&nbsp;❤️</a>
+					 			<a href="{% url 'users:post_handler' post.id user_profile.id %}?delete_like=yes#{{post.id}}" style="text-decoration: none; font-size: 27px;">&nbsp;❤️</a>
 					 			<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
 				 			{%elif forloop.last and like_in_post.user.id != user.id %}
-					 			<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes">&nbsp;♡</a>
+					 			<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes#{{post.id}}">&nbsp;♡</a>
 					 			<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
 				 			{%endif%}
 				 		{%empty%}
-					 		<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes">&nbsp;♡</a>
+					 		<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes#{{post.id}}">&nbsp;♡</a>
 					 		<br>
 					 		<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
 				 		{%endfor%}
