@@ -11,27 +11,6 @@ class IndexView(TemplateView):
 	template_name = 'messanger/index.html'
 
 
-# class ChatsView(ListView):
-# 	template_name = 'messanger/chat_list.html'
-# 	model = Chat
-# 	context_object_name = 'chat_list'
-
-# 	def post(self, request):
-# 		if 'add_new_chat' in request.GET:
-# 			with_user = request.GET.get('with_user')
-
-# 			if len(Chat.objects.filter(user_id=request.user.id).filter(with_user_id=with_user).all()) >= 1:
-# 				pass
-# 			else:
-# 				c = Chat(
-# 					user = request.user,
-# 					with_user = User.objects.get(pk=with_user)
-# 				)
-# 				c.save()
-
-# 		return HttpResponse(reverse('messanger:chats'))
-		
-
 def chat_list(request):
 
 	context = {}
@@ -55,10 +34,12 @@ def chat_list(request):
 					c2.save()
 					return HttpResponseRedirect(reverse('messanger:chats'))
 
-		elif 'delete_chat' in request.GET:
-			chat_id = request.GET.get('delete_chat')
+		elif 'user' in request.GET and 'with_user' in request.GET:
+			user = request.GET.get('user')
+			with_user = request.GET.get('with_user')
 
-			Chat.objects.get(pk=chat_id).delete()
+			Chat.objects.filter(user_id=user).filter(with_user_id=with_user).first().delete()
+			Chat.objects.filter(user_id=with_user).filter(with_user_id=user).first().delete()
 
 			return HttpResponseRedirect(reverse('messanger:chats'))
 

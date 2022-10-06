@@ -34,7 +34,7 @@
 		<h3>
 			{{ chat.with_user.username }}
 			<a class="btn btn-outline-success" href="{% url 'messanger:chat' user.id chat.with_user.id %}#new_msg">Открыть диалог</a>
-			<a class="btn btn-outline-danger" href="{% url 'messanger:chats' %}?delete_chat={{chat.id}}">Удалить диалог</a>
+			<a class="btn btn-outline-danger" href="{% url 'messanger:chats' %}?user={{user.id}}&with_user={{chat.with_user.id}}">Удалить диалог</a>
 			<hr>
 		</h3>
 	{%empty%}

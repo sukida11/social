@@ -7,7 +7,7 @@ from django.contrib.auth import login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 
-from .models import User, RequestFriends, UserFriends, ProfilePost, LikesPost
+from .models import User, RequestFriends, UserFriends, ProfilePost, LikesPost, Comment
 from .forms import *
 
 
@@ -44,6 +44,8 @@ def user_profile(request, pk):
 	form = EditUserInfo(instance=request.user)
 	form_create_post = CreatePostForm()
 
+	context = {}
+
 	if request.method == 'POST':
 		if 'profile_change' in request.POST:
 			form = EditUserInfo(data=request.POST, files=request.FILES, instance=request.user)
@@ -58,8 +60,26 @@ def user_profile(request, pk):
 			)
 			pp.save()
 
-	context = {'form': form, 'form_create_post': form_create_post}
+		elif 'comment_text' in request.POST:
+			c = Comment(
+				from_user=request.user,
+				post=ProfilePost.objects.get(pk=request.POST.get('post_id')),
+				text=request.POST.get('comment_text')
+			)
+			c.save()
+
+
+	if request.method == 'GET':
+
+		if 'check_comment' in request.GET and len(Comment.objects.filter(post_id=request.GET.get('check_comment'))) >= 1:
+			context['comment_list'] = Comment.objects.filter(post_id=request.GET.get('check_comment')).all()
+			print(context['comment_list'])
+
+
+	context['form'] = form
+	context['form_create_post'] = form_create_post
 	context['user_profile'] = User.objects.get(pk=pk)
+
 
 	if pk != request.user.id:
 		owner = request.user
@@ -73,6 +93,7 @@ def user_profile(request, pk):
 
 		else:
 			context['friend_status'] = 'add_friend'
+
 
 	if len(User.objects.get(pk=pk).profilepost_set.all())>=1:
 		context['post_list'] = ProfilePost.objects.filter(user_id=pk).order_by('-pub_date').all()

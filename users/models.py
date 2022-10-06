@@ -28,3 +28,10 @@ class ProfilePost(models.Model):
 class LikesPost(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	post = models.ForeignKey(ProfilePost, on_delete=models.CASCADE)
+
+
+class Comment(models.Model):
+	from_user = models.ForeignKey(User, on_delete=models.CASCADE)
+	post = models.ForeignKey(ProfilePost, on_delete=models.CASCADE)
+	text = models.TextField()
+	date = models.DateTimeField(default=timezone.now)

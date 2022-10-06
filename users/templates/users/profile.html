@@ -155,6 +155,20 @@
 					 			<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes#{{post.id}}">&nbsp;♡</a>
 					 			<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
 				 			{%endif%}
+				 			{%if post.comment_set%}
+				 				<a href="{%url 'users:profile' user_profile.id%}?check_comment={{post.id}}">Посмотреть комментарии</a>
+				 			{%endif%}
+				 			{% if comment_list %}
+				 			<br>
+				 				{% for comment in comment_list %}
+				 					{{comment.text}} | {{comment.date}} | {{comment.from_user.username}}<br>
+				 				{% endfor %}
+				 			{% endif %}
+				 			<form style="max-width: 400px;" method="post" action="{% url 'users:profile' user_profile.id %}">
+				 				{%csrf_token%}
+					 			<input type="hidden" value="{{post.id}}" name="post_id">
+					 			<input type="text" class="form-control" name="comment_text"><input class="btn btn-outline-success" type="submit" name="">
+					 		</form>
 				 		{%empty%}
 					 		<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes#{{post.id}}">&nbsp;♡</a>
 					 		<br>
