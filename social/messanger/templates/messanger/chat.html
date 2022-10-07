@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{%block content%}
+
+	<div class="container" style="background: #DEF7FE;">
+		<h4>{{with_user_dialog.username}}</h4>
+		<hr>
+		<div style="background: whitesmoke;">
+		{%for message in chat.msg.all%}
+			<p>
+				{{message.user.username}}: <br>
+				{{message.text}} <br> отправлено {{message.date}} 
+			</p>
+		{%empty%}
+		<h5>Сообщений пока что нет.</h5>
+		{%endfor%}
+		</div>
+		<hr>
+		<form action="{% url 'messanger:chat' user.id with_user_dialog.id %}#new_msg" method='post' id="new_msg">
+			{% csrf_token %}
+			<textarea name='msg_text' rows="1" cols="40" placeholder="Ваше сообщение"></textarea><input type="submit" class="btn btn-outline-success" style="font-size: 13px;" name="">
+			
+		</form>
+	</div>
+
+{%endblock%}

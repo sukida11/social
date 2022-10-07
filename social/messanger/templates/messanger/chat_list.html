@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="background: #DEF7FE;">
+
+	<h1>Ваши диалоги</h1>
+
+	<hr>
+
+		<div id="zatemnenie">
+	      <div id="okno">
+	      	<a href="#" class="close" style="">❌</a>
+	        <h4>Выберите пользователя для начала диалога</h5>
+	        {%if error%}
+	        	<p>{{error}}</p>
+	        {%endif%}
+	        {%for friend in user.owner.all%}
+	        {% if friend.friend.id in chats_with_id %}
+	        {%else%}
+	        <hr>
+	        <div>
+	        	<h5 style="text-align: left;">{{friend.friend.username}} | {{friend.friend.get_full_name}}<br><a style="margin-top: 10px;font-size: 14px;" class="btn btn-outline-success" href="{% url 'messanger:chats' %}?add_new_chat=yes&with_user={{friend.friend.id}}">Начать</a></h5>
+	        </div>
+	        <hr>
+	        {%endif%}
+	        {% endfor %}
+	      </div>
+	    </div>
+
+	<a style="margin: 20px;" class="btn btn-outline-info"  href="#zatemnenie">Новый диалог c другом</a>
+	<hr>
+
+	{% if chats %}
+	{% for chat in chats %}
+		<h3>
+			{{ chat.with_user.username }}
+			<a class="btn btn-outline-success" href="{% url 'messanger:chat' user.id chat.with_user.id %}#new_msg">Открыть диалог</a>
+			<a class="btn btn-outline-danger" href="{% url 'messanger:chats' %}?user={{user.id}}&with_user={{chat.with_user.id}}">Удалить диалог</a>
+			<hr>
+		</h3>
+	{%empty%}
+	<h3>У вас пока нет ни одного диалога, но вы можете начать его прямо сейчас</h3>
+	{%endfor%}
+	{%endif%}
+
+
+</div>
+{% endblock %}

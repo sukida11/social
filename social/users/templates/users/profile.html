@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load user_id_filter %}
+{% block content %}
+
+
+<div style="background: #DEF7FE; padding-bottom: 50px;" class="container">
+	<h2>
+		{{user_profile.username}}  {%if user_profile.is_superuser%}<button class="btn btn-danger">Администратор</button>{%endif%}
+		
+		<div style="float: right; margin: 10px; font-size: 17px;">
+			<p>{{user.last_login}}</p>	
+		</div>
+	</h2>
+	<h5>
+		{{user_profile.get_full_name}}		
+	</h5>
+
+	{% if user_profile.img %}
+	<img src="{{ user_profile.img.url }}" style="width: 200px; height: 250px;">
+	{%endif%}
+		{% if user.id == user_profile.id %}
+	{% if request.GET.edit_profile == 'yes' %}
+
+	<form method="post" action="{% url 'users:profile' user.id %}" enctype="multipart/form-data">
+		{%csrf_token%}
+		<input type="hidden" name="profile_change">
+		 <div class="form-row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="small mb-1" for="{{form.first_name.id_for_label}}">Имя</label>
+                                                {{form.first_name}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="small mb-1" for="{{form.last_name.id_for_label}}">Фамилия</label>
+                                                {{form.last_name}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-6">
+                                            <label class="small mb-1" for="{{form.username.id_for_label}}">Имя пользователя</label>
+                                            {{form.username}}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small mb-1" for="{{form.email.id_for_label}}">Адрес электронной
+                                                почты</label>
+                                            {{form.email}}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small mb-1" for="{{form.img.id_for_label}}">Аватар</label>
+                                            {{form.img}}
+                                        </div>
+                                    </div>
+        <div class="form-group mt-4 mb-0">
+                                        <input class="btn btn-outline-info btn-block" type="submit" value="Изменить данные аккаунта">
+                                    </div>
+                                    <div class="form-group mt-4 mb-0">
+                            
+							</div>
+	</form><br>
+	{% endif %}
+	{% if request.GET.edit_profile == 'yes' %}
+	<a href="{% url 'users:profile' user.id %}" class="btn btn-outline-danger btn-block">Отменить</a>
+	
+	{% else %}
+
+		<div style="margin-top: 10px; font-size: 17px;">
+			<a class="btn btn-outline-info" href="{% url 'users:profile' user.id %}?edit_profile=yes">Редактировать профиль</a>	
+		</div>
+	
+	{% endif %}
+	{% endif %}
+	
+	{% if user_profile.id != user.id %}
+		
+		{% if friend_status == 'in_friendlist' %}
+			<div style="margin-top: 10px; font-size: 17px;">
+				<p style='font-size: 18px; margin-bottom: 0px;'>Уже в друзьях</p>
+			<a class="btn btn-outline-danger" href="{% url 'users:delete_friend' user.id user_profile.id%}">Удалить из друзей</a>	
+		</div>
+		{% elif friend_status == 'add_friend' %}
+        	<div style="margin-top: 10px; font-size: 17px;">
+				<a class="btn btn-outline-success" href='{% url "users:create_request_friends" user.id user_profile.id %}'>Добавить в друзья</a>
+			</div>
+		{% elif friend_status == 'request_sent' %}
+			<div style="margin-top: 10px; font-size: 17px;">
+				<p style='font-size: 18px; margin-bottom: 0px;'>Запрос отправлен</p>
+				<a class="btn btn-outline-info" href='{%url "users:reject_friend" user.id user_profile.id%}'>Отклонить запрос</a>
+			</div>
+		{% endif %}
+
+		<div style="margin-top: 10px; font-size: 17px;">
+		<a class="btn btn-outline-info" href='{%url "messanger:chats"%}?add_new_chat=yes&with_user={{user_profile.id}}'>Начать диалог</a>
+	</div>
+	{% endif %}
+	
+	
+
+	{%if user.id == user_profile.id%}
+
+
+		<div id="zatemnenie">
+      <div id="okno">
+      	<a href="#" class="close" style="">❌</a>
+        <h5>Создание поста.</h5>
+        
+        <form action='{% url "users:profile" user.id %}' enctype="multipart/form-data" method="post">
+        	{% csrf_token %}
+        	<input type="hidden" name="create_post">
+        	{{form_create_post.user}}
+        	{{form_create_post.text}}
+        	<label style="margin-top: 20px;" for="{{form_create_post.img.id_for_label}}">Вы можете прикрепить одну фотографию к вашему посту.</label>
+        	{{form_create_post.img}}
+        	<input class="btn btn-outline-info" style="margin-top: 20px;" type="submit" name="" value="Создать">
+        </form>
+
+      </div>
+    </div>
+
+
+
+	<div style="text-align: center; margin-top: 20px;">
+		<a class="btn btn-outline-info" style="font-size: 14px;" href="#zatemnenie">Создать пост</a>
+	</div>
+	{% endif %}
+
+	{% for post in post_list %}
+		
+		<div id="{{post.id}}" class="d-flex" style="background: #B5F2EA; margin-top: 20px; border-radius: 10px;">
+  		
+  			{%if post.img%}
+  		
+  			<div class="p-2 flex-fill">
+  				
+				<img src="{{post.img.url}}" style="max-width: 500px; max-height: 500px; ">
+
+  			</div>
+  		
+  			{% endif %}
+  		
+  			<div class="p-2 flex-fill">
+  		
+  				<div><p>{{post.text|linebreaksbr}}&nbsp;&nbsp;&nbsp;</p></div>
+ 
+				<p style="text-align: right; margin-left: 10px; margin-right: 10px;">{{post.pub_date}}	 {%if user.id == user_profile.id%}<a style="font-size: 14px;text-align: right;" href="{% url 'users:post_handler' post.id user_profile.id %}?delete_post=yes" class="btn btn-outline-danger">Удалить публикацию</a>{%endif%}
+					
+					{% if post.likespost_set%}
+						{%for like_in_post in post.likespost_set|id_filter:user.id%}
+							{%if like_in_post.post.id == post.id and like_in_post.user.id == user.id%}
+					 			<a href="{% url 'users:post_handler' post.id user_profile.id %}?delete_like=yes#{{post.id}}" style="text-decoration: none; font-size: 27px;">&nbsp;❤️</a>
+					 			<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
+				 			{%elif forloop.last and like_in_post.user.id != user.id %}
+					 			<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes#{{post.id}}">&nbsp;♡</a>
+					 			<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
+				 			{%endif%}
+				 			{%if post.comment_set%}
+				 				<a href="{%url 'users:profile' user_profile.id%}?check_comment={{post.id}}">Посмотреть комментарии</a>
+				 			{%endif%}
+				 			{% if comment_list %}
+				 			<br>
+				 				{% for comment in comment_list %}
+				 					{{comment.text}} | {{comment.date}} | {{comment.from_user.username}}<br>
+				 				{% endfor %}
+				 			{% endif %}
+				 			<form style="max-width: 400px;" method="post" action="{% url 'users:profile' user_profile.id %}">
+				 				{%csrf_token%}
+					 			<input type="hidden" value="{{post.id}}" name="post_id">
+					 			<input type="text" class="form-control" name="comment_text"><input class="btn btn-outline-success" type="submit" name="">
+					 		</form>
+				 		{%empty%}
+					 		<a style="font-size: 30px; text-decoration: none; " href="{% url 'users:post_handler' post.id user_profile.id %}?add_like=yes#{{post.id}}">&nbsp;♡</a>
+					 		<br>
+					 		<p style="text-align: right;">Лайков всего - {{ post.likespost_set.all|length }}</p>
+				 		{%endfor%}
+					{%endif%}
+					</p>
+		
+			</div>
+		
+		</div>
+		
+	{%endfor%}
+
+</div>
+
+{% endblock %}

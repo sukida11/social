@@ -1,0 +1,33 @@
+{%extends 'reg_log_base.html'%}
+{% block content %}
+
+{% if form.errors %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert"
+                             style="margin-top: 50px;">
+                            <p style="list-style-type: none;">{{form.as_text}}</p>
+
+                        </div>
+                        {% endif %}
+
+<form method="post" style="padding: 40px; background: #DEF7FE;">
+	{%csrf_token%}
+	<div class="d-flex justify-content-center">
+  		<div class="p-2"><label for="{{form.first_name.id_for_label}}">Имя:</label>{{form.first_name}}</div>
+  		<div class="p-2"><label for="{{form.last_name.id_for_label}}">Фамилия:</label>{{form.last_name}}</div>
+	</div>
+	<div class="d-flex justify-content-center">
+  		<div class="p-2"><label for="{{form.username.id_for_label}}">Придумайте логин:</label>{{form.username}}</div>
+  		<div class="p-2"><label for="{{form.email.id_for_label}}">Электронная почта:</label>{{form.email}}</div>
+	</div>
+	<div class="d-flex justify-content-center">
+  		<div class="p-2"><label for="{{form.password1.id_for_label}}">Придумайте пароль:</label>{{form.password1}}</div>
+  		<div class="p-2"><label for="{{form.password2.id_for_label}}">Повторите пароль:</label>{{form.password2}}</div>
+	</div>
+	<div style="width: 100%; text-align: center;">
+	<input type="submit" class='btn btn-outline-info' name="" value="Зарегистрироваться">
+	</div>
+</form>
+
+
+
+{% endblock %}
