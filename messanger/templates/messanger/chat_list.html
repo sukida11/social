@@ -13,6 +13,9 @@
 	        {%if error%}
 	        	<p>{{error}}</p>
 	        {%endif%}
+
+	        
+
 	        {%for friend in user.owner.all%}
 	        {% if friend.friend.id in chats_with_id %}
 	        {%else%}
@@ -31,12 +34,17 @@
 
 	{% if chats %}
 	{% for chat in chats %}
+	{%for user_dialog in chat.users.all%}
+	{% if  user_dialog.id != user.id%}
 		<h3>
-			{{ chat.with_user.username }}
-			<a class="btn btn-outline-success" href="{% url 'messanger:chat' user.id chat.with_user.id %}#new_msg">Открыть диалог</a>
-			<a class="btn btn-outline-danger" href="{% url 'messanger:chats' %}?user={{user.id}}&with_user={{chat.with_user.id}}">Удалить диалог</a>
+			{{ user_dialog.username }}
+			<a class="btn btn-outline-success" href="{% url 'messanger:chat' user.id user_dialog.id %}#new_msg">Открыть диалог</a>
+			<a class="btn btn-outline-danger" href="{% url 'messanger:chats' %}?user={{user.id}}&with_user={{user_dialog.id}}">Удалить диалог</a>
 			<hr>
 		</h3>
+		{% else %}
+		{%endif%}
+		{%endfor%}
 	{%empty%}
 	<h3>У вас пока нет ни одного диалога, но вы можете начать его прямо сейчас</h3>
 	{%endfor%}

@@ -17,67 +17,86 @@ def chat_list(request):
 
 	if request.method == 'GET':
 		if 'add_new_chat' in request.GET:
-				with_user = request.GET.get('with_user')
+				with_user_id = request.GET.get('with_user')
+				with_user = User.objects.get(pk=with_user_id)
 
-				if len(Chat.objects.filter(user_id=request.user.id).filter(with_user_id=with_user).all()) >= 1:
+				if len(Chat.objects.filter(users__id=request.user.id).filter(users__id=with_user_id).all()) >= 1:
 					context['error'] = 'Диалог с данным пользователем уже есть.'
 				else:
-					c = Chat(
-						user = request.user,
-						with_user = User.objects.get(pk=with_user)
-					)
-					c2 = Chat(
-						user=User.objects.get(pk=with_user),
-						with_user=request.user
-					)
+
+					c = Chat()
 					c.save()
-					c2.save()
+					c.users.add(request.user, with_user)
+					c.save()
+
 					return HttpResponseRedirect(reverse('messanger:chats'))
 
 		elif 'user' in request.GET and 'with_user' in request.GET:
 			user = request.GET.get('user')
 			with_user = request.GET.get('with_user')
 
-			Chat.objects.filter(user_id=user).filter(with_user_id=with_user).first().delete()
-			Chat.objects.filter(user_id=with_user).filter(with_user_id=user).first().delete()
+			if int(user) == request.user.id:
+				Chat.objects.filter(users__id=user).filter(users__id=with_user).delete()
 
 			return HttpResponseRedirect(reverse('messanger:chats'))
 
 
-	if len(Chat.objects.filter(user_id=request.user.id).all()) >= 1:
-		context['chats'] = Chat.objects.filter(user_id=request.user.id).all()
+	if len(Chat.objects.filter(users__id=request.user.id).all()) >= 1:
+		context['chats'] = Chat.objects.filter(users__id=request.user.id).all()
 		context['chats_with_id'] = []
 
 		for chat in context['chats']:
-			context['chats_with_id'].append(chat.with_user.id)
-
-		print(context['chats_with_id'])
+			
+			for user in chat.users.all():
+				if user.username == request.user.username:
+					continue
+				else:
+					context['chats_with_id'].append(user.id)
 
 	else:
-		context['chats'] = []
+		context['chats'] = ''
+
 
 	return render(request, 'messanger/chat_list.html', context=context)
 
 
 def chat_view(request, user, with_user):
 	context = {}
-	context['chat'] = Chat.objects.filter(user_id=user).filter(with_user_id=with_user).first()
+	context['chat'] = Chat.objects.filter(users__id=user).filter(users__id=with_user).first()
 	context['with_user_dialog'] = User.objects.get(pk=with_user)
 
 	if request.method == 'POST':
 		if 'msg_text' in request.POST:
-			msg1 = Message(
+			c=Chat.objects.filter(users__id=user).filter(users__id=with_user).first()
+			
+			msg = Message(
 				user=request.user,
-				chat=context['chat'],
 				text=request.POST.get('msg_text')
 			)
-			msg1.save()
+			msg.save()
 
-			msg2 = Message(
-				user=request.user,
-				chat=Chat.objects.filter(user_id=with_user).filter(with_user_id=user).first(),
-				text=request.POST.get('msg_text')
-			)
-			msg2.save()
+			c.messages.add(msg)
+			c.save()
+			
 
 	return render(request, 'messanger/chat.html', context=context)
+
+
+def delete_msg(request):
+
+	if request.method == 'GET':
+
+		user_id = request.GET.get('user_id')
+		with_user_id = request.GET.get('with_user_id')
+		message_id = request.GET.get('message_id')
+
+		if request.user.id == int(user_id):
+			mc = Chat.objects.filter(messages__pk=message_id).first()
+			m = mc.messages.get(pk=message_id).delete()
+
+
+	return HttpResponseRedirect(reverse('messanger:chat', 
+		kwargs={'user': user_id, 
+				'with_user': with_user_id
+				}
+	))

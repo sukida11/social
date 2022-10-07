@@ -5,10 +5,15 @@
 		<h4>{{with_user_dialog.username}}</h4>
 		<hr>
 		<div style="background: whitesmoke;">
-		{%for message in chat.msg.all%}
+		{%for message in chat.messages.all%}
 			<p>
 				{{message.user.username}}: <br>
 				{{message.text}} <br> отправлено {{message.date}} 
+				{% if message.user.id == user.id %}
+				<a href="{% url 'messanger:delete_msg' %}?user_id={{user.id}}&with_user_id={{with_user_dialog.id}}&message_id={{message.id}}">
+					Удалить сообщение
+				</a>
+				{% endif %}
 			</p>
 		{%empty%}
 		<h5>Сообщений пока что нет.</h5>
